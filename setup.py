@@ -10,6 +10,6 @@ setup(
     author_email='Jennings.Zhang@childrens.harvard.edu',
     description='Python interface for basic MNI .obj file format. '
                 'Supports read, write, and calculations on a vertex neighbor graph.',
-    install_requires=['numpy~=1.19.0'],
+    install_requires=['numpy~=1.22.0'],
     python_requires='>=3.6',
 )
