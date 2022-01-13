@@ -36,7 +36,7 @@ def depth_potential(filename, arg='', command='depth_potential'):
     if not arg.startswith('-'):
         arg = '-' + arg
     with NamedTemporaryFile() as tmp:
-        sp.run([command, arg, filename, tmp.name])
+        sp.run([command, arg, filename, tmp.name], check=True)
         data = np.loadtxt(tmp.name, dtype=np.float32)
     return data
 
