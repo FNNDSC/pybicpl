@@ -17,7 +17,7 @@ import subprocess as sp
 from os import unlink
 
 
-def write_file(filename, data):
+def _write_file(filename, data):
     """
     Writes an iterable to a file.
     """
@@ -26,7 +26,7 @@ def write_file(filename, data):
             out.write(str(value) + '\n')
 
 
-def list2str(array):
+def _list2str(array):
     """
     Join a list with spaces between elements.
     """
@@ -159,29 +159,29 @@ class MniObj:
         tmp = NamedTemporaryFile('w', suffix='_81920.obj', delete=False)
         self._write_to(tmp)
         tmp.close()
-        self.normals = depth_potential(tmp.name, '-normals')
+        # self.normals = depth_potential(tmp.name, '-normals')
         unlink(tmp.name)
 
     def _write_to(self, out):
         header = ['P', self.surfprop['A'], self.surfprop['D'],
                   self.surfprop['S'], self.surfprop['SE'],
                   self.surfprop['T'], self.n_points]
-        out.write(list2str(header) + '\n')
+        out.write(_list2str(header) + '\n')
 
         for point in self.points:
-            out.write(' ' + list2str(point) + '\n')
+            out.write(' ' + _list2str(point) + '\n')
 
         for vector in self.normals:
-            out.write(' ' + list2str(vector) + '\n')
+            out.write(' ' + _list2str(vector) + '\n')
 
         out.write('\n {}\n'.format(self.n_items))
-        out.write(' 0 ' + list2str(self.colour) + '\n\n')
+        out.write(' 0 ' + _list2str(self.colour) + '\n\n')
 
         for i in range(0, self.n_items, 8):
-            out.write(' ' + list2str(self.end_indices[i:i+8]) + '\n')
+            out.write(' ' + _list2str(self.end_indices[i:i + 8]) + '\n')
 
         for i in range(0, len(self.indices), 8):
-            out.write(' ' + list2str(self.indices[i:i+8]) + '\n')
+            out.write(' ' + _list2str(self.indices[i:i + 8]) + '\n')
 
     def save(self, filename):
         with open(filename, 'w') as out:
