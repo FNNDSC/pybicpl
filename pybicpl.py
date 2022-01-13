@@ -1,14 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-2019-08-21
-
 Parser for the MNI .obj file format
 http://www.bic.mni.mcgill.ca/users/mishkin/mni_obj_format.pdf
-
-While I would have loved to try programming in C and bicpl,
-I couldn't figure out the DepEndeNCiEs.
-
-@author: Jennings Zhang <jenni_zh@protonmail.com>
 """
 
 import numpy as np
