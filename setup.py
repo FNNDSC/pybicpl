@@ -1,4 +1,9 @@
 from setuptools import setup
+from shutil import which
+
+if not which('depth_potential'):
+    raise Exception('depth_potential not found, please install CIVET.')
+
 
 setup(
     name='pybicpl',
