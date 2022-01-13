@@ -7,7 +7,7 @@ if not which('depth_potential'):
 
 setup(
     name='pybicpl',
-    version='0.1-1',
+    version='0.2.0',
     py_modules=['pybicpl'],
     url='https://github.com/FNNDSC/pybicpl',
     license='MIT',
