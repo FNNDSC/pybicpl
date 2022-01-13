@@ -1,9 +1,10 @@
 from setuptools import setup
-from shutil import which
+import os
+import shutil
 
-if not which('depth_potential'):
+if not os.getenv('GITHUB_WORKFLOW') == 'Publish' \
+        and not shutil.which('depth_potential'):
     raise Exception('depth_potential not found, please install CIVET.')
-
 
 setup(
     name='pybicpl',
