@@ -8,7 +8,7 @@ if not os.getenv('GITHUB_WORKFLOW') == 'Publish' \
 
 setup(
     name='pybicpl',
-    version='0.2.0',
+    version='0.2.0-1',
     py_modules=['pybicpl'],
     url='https://github.com/FNNDSC/pybicpl',
     license='MIT',
