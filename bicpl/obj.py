@@ -59,13 +59,21 @@ class PolygonObj:
     indices: tuple[int, ...]
     """
     A list of integer indices into the `point_array` that specifies how each of the vertices
-    is assigned to each polygon. The length of this array must be equal to the
-    greatest value in the `end_indices` array plus one.
+    is assigned to each polygon.
     """
 
     def __post_init__(self):
         if self.colour_flag != 0:
             raise ValueError('colour_flag must be 0')
+        if self.nitems != len(self.end_indices):
+            raise ValueError(f'{self.nitems} != {len(self.end_indices)}')
+        if len(self.indices) != max(self.end_indices):
+            # The spec says:
+            # > The length of [indices] must be equal to the
+            # > greatest value in the `end_indices` array plus one.
+            # But it doesn't seem correct, since elements of `end_indices`
+            # represent an exclusive index number, not an inclusive one.
+            raise ValueError(f'{len(self.indices)} != {max(self.end_indices)}')
 
     def neighbor_graph(self, triangles_only=True) -> tuple[set[int], ...]:
         """
@@ -104,7 +112,7 @@ class PolygonObj:
                 out.write(' ' + _list2str(vector) + '\n')
 
             out.write(f'\n {self.nitems}\n')
-            out.write(f' {self.colour_flag} {self.colour_table}\n\n')
+            out.write(f' {self.colour_flag} {_serialize_colour_table(self.colour_table)}\n\n')
 
             for i in range(0, self.nitems, 8):
                 out.write(' ' + _list2str(self.end_indices[i:i + 8]) + '\n')
@@ -137,8 +145,8 @@ class PolygonObj:
 
         start = 7
         end = n_points * 3 + start
-        points_array = [np.float32(x) for x in data[start:end]]
-        points_array = np.reshape(points_array, (n_points, 3,))
+        point_array = [np.float32(x) for x in data[start:end]]
+        point_array = np.reshape(point_array, (n_points, 3,))
 
         start = end
         end = n_points * 3 + start
@@ -149,11 +157,10 @@ class PolygonObj:
 
         colour_flag = int(data[end+1])
         if colour_flag != 0:
-            print(f'nitems is {nitems}, colour_flag is {colour_flag}')
             raise ValueError('colour_flag is not 0')
         start = end + 2
         end = start + 4
-        colour_table = tuple(np.float32(x) for x in data[start:end])
+        colour_table = (Colour(tuple(np.float32(x) for x in data[start:end])),)
 
         start = end
         end = start + nitems
@@ -166,7 +173,7 @@ class PolygonObj:
         return cls(
             surfprop=surfprop,
             n_points=n_points,
-            point_array=points_array,
+            point_array=point_array,
             normals=normals,
             nitems=nitems,
             colour_flag=colour_flag,
@@ -175,9 +182,44 @@ class PolygonObj:
             indices=indices
         )
 
+    @classmethod
+    def from_data(cls, verts: npt.NDArray[np.float32], faces: npt.NDArray[np.int32], normals: npt.NDArray[np.float32],
+                  surfprop: SurfProp = SurfProp(A=0.3, D=0.3, S=0.4, SE=10, T=1),
+                  colour_flag=0, colour_table=(Colour((1, 1, 1, 1)),)):
+        """
+        Create a `.obj` from raw data.
+
+        Paremeters
+        ----------
+        verts: (V, 3) array
+            Spatial coordinates for V unique mesh vertices.
+        faces: (F, 3) array
+            Define triangular faces via referencing vertex indices from `verts`.
+        normals: (V, 3) array
+            The normal direction at each vertex.
+        """
+        n_points = len(verts)
+        nitems = len(faces)
+
+        return cls(
+            surfprop=surfprop,
+            n_points=n_points,
+            point_array=verts,
+            normals=normals,
+            nitems=nitems,
+            colour_flag=colour_flag,
+            colour_table=colour_table,
+            end_indices=tuple(range(3, (nitems + 1) * 3, 3)),
+            indices=tuple(faces.flatten())
+        )
+
 
 def _list2str(array):
     """
     Join a list with spaces between elements.
     """
     return ' '.join(str(a) for a in array)
+
+
+def _serialize_colour_table(ct: tuple[Colour, ...]) -> str:
+    return ' '.join((' '.join(val for val in map(str, colour))) for colour in ct)
