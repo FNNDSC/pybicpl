@@ -1,0 +1,29 @@
+from typing import Iterator
+import numpy as np
+import numpy.typing as npt
+
+
+def _local_da(neighbors, data, point_index) -> npt.NDArray[np.float]:
+    """
+    Average absolute difference between the
+    value at point_index and its neighbors.
+    """
+    return np.mean(np.abs(data[point_index] - data[tuple(neighbors)]))
+
+
+def difference_average(neighbor_graph: tuple[set[int], ...],
+                       data: npt.NDArray[np.float]
+                       ) -> Iterator[npt.NDArray[np.float]]:
+    """
+    Average absolute difference between the
+    value at point_index and its neighbors
+    for every vertex in the given array.
+
+    Parameters
+    ----------
+    neighbor_graph:
+        Computed from `bicpl.PolygonObj.neighbor_graph`
+    data:
+        Vertex-wise data, typically produced from `depth_potential`
+    """
+    return (_local_da(n, data, i) for i, n in enumerate(neighbor_graph))
