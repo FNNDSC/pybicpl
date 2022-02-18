@@ -1,3 +1,9 @@
+"""
+Helper functions for computing metrics about surfaces.
+
+https://ipfs.babymri.org/ipfs/QmZuoBXCwGB9Jqvoait1kTw75ogNoPcMnYFT6v1wAomco6/2019_fnndsc_subplate_surfaces.pdf
+"""
+
 from typing import Iterator
 import numpy as np
 import numpy.typing as npt

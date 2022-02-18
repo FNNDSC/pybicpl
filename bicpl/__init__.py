@@ -7,5 +7,7 @@ from bicpl.obj import PolygonObj
 __docformat__ = 'numpy'
 
 __all__ = [
-    'PolygonObj'
+    'PolygonObj',
+    'types',
+    'math'
 ]

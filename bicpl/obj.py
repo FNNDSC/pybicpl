@@ -14,7 +14,7 @@ class PolygonObj:
     http://www.bic.mni.mcgill.ca/users/mishkin/mni_obj_format.pdf
 
     Note: the data representation is neither efficient nor easy to work with.
-    `PolygonObj` directly corresponds to the file format spec. It would be
+    `PolygonObj` directly corresponds to the file format spec. It might be
     easier to work with proxy objects or just matrices instead.
     """
     surfprop: SurfProp
