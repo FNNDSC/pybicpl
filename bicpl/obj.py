@@ -4,7 +4,7 @@ import subprocess as sp
 from contextlib import contextmanager
 from dataclasses import dataclass
 from tempfile import NamedTemporaryFile
-from typing import TextIO, ContextManager
+from typing import TextIO, ContextManager, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -102,7 +102,7 @@ class PolygonObj:
             prev = i
         return neighbors
 
-    def save(self, filename: str | os.PathLike):
+    def save(self, filename: Union[str, os.PathLike]):
         """
         Write this object to a file.
         """
@@ -131,7 +131,7 @@ class PolygonObj:
             file.write(' ' + _list2str(self.indices[i:i + 8]) + '\n')
 
     @classmethod
-    def from_file(cls, filename: str | os.PathLike) -> 'PolygonObj':
+    def from_file(cls, filename: Union[str, os.PathLike]) -> 'PolygonObj':
         """
         Parse an `.obj` file.
         """
