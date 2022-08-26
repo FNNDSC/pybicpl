@@ -1,8 +1,12 @@
 import os
+from tempfile import NamedTemporaryFile
+import subprocess as sp
 
 import numpy as np
 import numpy.typing as npt
 from dataclasses import dataclass
+
+from bicpl.civet import needs_civet
 from bicpl.types import SurfProp, Colour
 
 
@@ -155,7 +159,7 @@ class PolygonObj:
 
         nitems = int(data[end])
 
-        colour_flag = int(data[end+1])
+        colour_flag = int(data[end + 1])
         if colour_flag != 0:
             raise ValueError('colour_flag is not 0')
         start = end + 2
@@ -212,6 +216,20 @@ class PolygonObj:
             end_indices=tuple(range(3, (nitems + 1) * 3, 3)),
             indices=tuple(faces.flatten())
         )
+
+    @classmethod
+    @needs_civet
+    def from_tetra(cls,
+                   origin: tuple[float, float, float] = (0, 0, 0),
+                   radius: tuple[float, float, float] = (1, 1, 1),
+                   n_triangles: int = 81920) -> 'PolygonObj':
+        params = map(str, origin + radius + (n_triangles,))
+        with NamedTemporaryFile(suffix='_81920.obj') as tmp:
+            command = ['create_tetra', tmp.name, *params]
+            sp.run(command, stdout=sp.DEVNULL, check=True)
+            with open(tmp.name, 'r') as f:
+                data = f.readlines()
+        return cls.from_str('\n'.join(data))
 
 
 def _list2str(array):
