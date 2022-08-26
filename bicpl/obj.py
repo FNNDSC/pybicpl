@@ -1,12 +1,15 @@
+import dataclasses
 import os
-from tempfile import NamedTemporaryFile
 import subprocess as sp
+from contextlib import contextmanager
+from dataclasses import dataclass
+from tempfile import NamedTemporaryFile
+from typing import TextIO, ContextManager
 
 import numpy as np
 import numpy.typing as npt
-from dataclasses import dataclass
 
-from bicpl.civet import needs_civet
+from bicpl.civet import needs_civet, depth_potential
 from bicpl.types import SurfProp, Colour
 
 
@@ -104,25 +107,28 @@ class PolygonObj:
         Write this object to a file.
         """
         with open(filename, 'w') as out:
-            header = ['P', self.surfprop.A, self.surfprop.D,
-                      self.surfprop.S, self.surfprop.SE,
-                      self.surfprop.T, self.n_points]
-            out.write(_list2str(header) + '\n')
+            self.write_to(out)
 
-            for point in self.point_array:
-                out.write(' ' + _list2str(point) + '\n')
+    def write_to(self, file: TextIO):
+        header = ['P', self.surfprop.A, self.surfprop.D,
+                  self.surfprop.S, self.surfprop.SE,
+                  self.surfprop.T, self.n_points]
+        file.write(_list2str(header) + '\n')
 
-            for vector in self.normals:
-                out.write(' ' + _list2str(vector) + '\n')
+        for point in self.point_array:
+            file.write(' ' + _list2str(point) + '\n')
 
-            out.write(f'\n {self.nitems}\n')
-            out.write(f' {self.colour_flag} {_serialize_colour_table(self.colour_table)}\n\n')
+        for vector in self.normals:
+            file.write(' ' + _list2str(vector) + '\n')
 
-            for i in range(0, self.nitems, 8):
-                out.write(' ' + _list2str(self.end_indices[i:i + 8]) + '\n')
+        file.write(f'\n {self.nitems}\n')
+        file.write(f' {self.colour_flag} {_serialize_colour_table(self.colour_table)}\n\n')
 
-            for i in range(0, len(self.indices), 8):
-                out.write(' ' + _list2str(self.indices[i:i + 8]) + '\n')
+        for i in range(0, self.nitems, 8):
+            file.write(' ' + _list2str(self.end_indices[i:i + 8]) + '\n')
+
+        for i in range(0, len(self.indices), 8):
+            file.write(' ' + _list2str(self.indices[i:i + 8]) + '\n')
 
     @classmethod
     def from_file(cls, filename: str | os.PathLike) -> 'PolygonObj':
@@ -230,6 +236,40 @@ class PolygonObj:
             with open(tmp.name, 'r') as f:
                 data = f.readlines()
         return cls.from_str('\n'.join(data))
+
+    @needs_civet
+    def reset_points(self, point_array: npt.NDArray[np.float32]) -> 'PolygonObj':
+        """
+        Create a new ``PolygonObj`` from this one, with a different ``point_array``,
+        then recompute normal vectors by calling ``recompute_normals``.
+        """
+        updated = dataclasses.replace(self, point_array=point_array)
+        return updated.fix_normals()
+
+    def fix_normals(self) -> 'PolygonObj':
+        """
+        Use ``depth_potential`` to recompute this surface's normal vectors.
+
+        Useful in situations where ``point_array`` was produced by a non-CIVET program.
+        """
+        return dataclasses.replace(self, normals=self.depth_potential(arg='-normals'))
+
+    def depth_potential(self, arg: str) -> npt.NDArray[np.float32]:
+        """
+        Run depth_potential on this data, returning the result as a numpy array.
+        """
+        with self.as_file() as tmp:
+            return depth_potential(tmp, arg)
+
+    @contextmanager
+    def as_file(self) -> ContextManager[str]:
+        """
+        Write this surface to a temporary file so that you can call subprocesses on it.
+        """
+        with NamedTemporaryFile('w', suffix='_81920.obj', delete=False) as tmp:
+            self.write_to(tmp)
+        yield tmp.name
+        os.unlink(tmp.name)
 
 
 def _list2str(array):
