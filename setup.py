@@ -18,4 +18,11 @@ setup(
                 'Supports read, write, and calculations on a vertex neighbor graph.',
     install_requires=['numpy~=1.22.2'],
     python_requires='>=3.9',
+    entry_points={
+        'console_scripts': [
+            'obj_wf2mni = bicpl.wavefront:wavefront2mni',
+            'obj_mni2wf = bicpl.wavefront:mni2wavefront',
+            'obj_wf2asc = bicpl.wavefront:wavefront2asc'
+        ]
+    }
 )

@@ -193,7 +193,7 @@ class PolygonObj:
         )
 
     @classmethod
-    def from_data(cls, verts: npt.NDArray[np.float32], faces: npt.NDArray[np.int32], normals: npt.NDArray[np.float32],
+    def from_data(cls, verts: npt.NDArray[np.float32], faces: npt.NDArray[np.uint32], normals: npt.NDArray[np.float32],
                   surfprop: SurfProp = SurfProp(A=0.3, D=0.3, S=0.4, SE=10, T=1),
                   colour_flag=0, colour_table=(Colour((1, 1, 1, 1)),)):
         """
