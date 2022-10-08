@@ -30,8 +30,11 @@ class WavefrontObj:
         verts = []
         faces = []
 
-        for line in handle:
-            letter, *t = line.strip().split()
+        # remove comments from stream
+        data = filter(None, map(cls._strip_comment, handle))
+
+        for line in data:
+            letter, *t = line.split()
             if not len(t) == 3:
                 raise ValueError(f'Line is not 3D: "{line.strip()}"')
             if letter == 'v':
@@ -40,6 +43,11 @@ class WavefrontObj:
                 # wavefront is one-indexed
                 faces.append(tuple(map(int, t)))
         return cls(verts, faces)  # type: ignore
+
+    @staticmethod
+    def _strip_comment(s: str):
+        parts = s.split('#', 1)
+        return parts[0].strip()
 
     @classmethod
     def from_file(cls, filename: Union[str, os.PathLike]) -> 'WavefrontObj':
