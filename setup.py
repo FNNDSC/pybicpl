@@ -8,7 +8,7 @@ if not os.getenv('GITHUB_WORKFLOW') == 'Publish' \
 
 setup(
     name='pybicpl',
-    version='0.5.0',
+    version='0.5.1',
     packages=['bicpl'],
     url='https://github.com/FNNDSC/pybicpl',
     license='MIT',
@@ -16,7 +16,7 @@ setup(
     author_email='Jennings.Zhang@childrens.harvard.edu',
     description='Python interface for basic MNI .obj file format. '
                 'Supports read, write, and calculations on a vertex neighbor graph.',
-    install_requires=['numpy~=1.22.2'],
+    install_requires=['numpy~=1.22'],
     python_requires='>=3.9',
     entry_points={
         'console_scripts': [
